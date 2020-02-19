@@ -1,5 +1,6 @@
 #columns {
   display: flex;
+  align-items: flex-start;
 }
 .addAnotherListButton {
   width: 150px;
@@ -10,12 +11,43 @@
 .list,
 .listInput {
   background-color: rgba(0, 0, 0, 0.24);
-  margin-right: 50px;
-  width: 270px;
-  height: 500px;
+  margin-right: 10px;
+  width: 272px;
 }
 
 .card {
-  border: 1px solid black;
-  height: 30px;
+  height: 20px;
+  padding: 6px 8px 2px;
+  margin: 0 0 4px;
+  background-color: #fff;
+  color: #172b4d;
+  width: 240px;
+  border-radius: 5px;
+}
+.cardContainer {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 4px;
+  padding: 0 4px;
+  z-index: 1;
+  min-height: 0;
+  margin-top: 10px;
+}
+.cardSpace {
+  height: 20px;
+  padding: 6px 8px 2px;
+  margin: 0 0 4px;
+  background-color: rgba(255, 255, 255, 0.424);
+  width: 240px;
+  border-radius: 5px;
+}
+
+h4 {
+  display: inline-block;
+}
+
+button {
+  display: block;
 }

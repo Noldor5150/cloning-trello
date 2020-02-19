@@ -1,9 +1,10 @@
 const columns = document.querySelector("#columns");
 let data = [];
-let draggableCardObject = null;
-let draggableCardIndex = -1;
-let draggableListIndex = -1;
-let draggedOverCardIndex = -1;
+let startCardObject = null;
+let startCardIndex = -1;
+let startListIndex = -1;
+let finishCardIndex = -1;
+let finishListIndex = -1;
 
 window.addEventListener("load", event => {
   render();
@@ -18,10 +19,12 @@ function render() {
 
     data.forEach((column, listIndex) => {
       let list = createList(column.title, listIndex);
+      let cardContainer = createElement("div", { className: "cardContainer" });
       columns.appendChild(list);
       column.cards.forEach((card, cardIndex) => {
-        list.appendChild(createCard(card, cardIndex, listIndex));
+        cardContainer.appendChild(createCard(card, cardIndex, listIndex));
       });
+      list.appendChild(cardContainer);
     });
   }
 
@@ -94,15 +97,40 @@ function createList(title, listIndex) {
 
   list.addEventListener("dragover", event => {
     event.preventDefault();
+    if (startListIndex !== listIndex) {
+      finishListIndex = listIndex;
+    }
+    // console.log(document.querySelector);
+
+    // if (!document.querySelector('.cardSpace')) {
+    //   event.target.appendChild(createCardSpace());
+    // }
   });
 
   list.addEventListener("dragenter", event => {
     event.preventDefault();
   });
 
+  list.addEventListener("dragleave", event => {
+    event.preventDefault();
+  });
+
   list.addEventListener("drop", event => {
-    data[draggableListIndex].cards.splice(draggableCardIndex, 1);
-    data[listIndex].cards.splice(draggedOverCardIndex, 0, draggableCardObject);
+    if (finishListIndex > -1 && finishCardIndex > -1) {
+      data[startListIndex].cards.splice(startCardIndex, 1);
+      data[listIndex].cards.splice(finishCardIndex, 0, startCardObject);
+    }
+    if (finishListIndex > -1 && finishCardIndex == -1) {
+      data[startListIndex].cards.splice(startCardIndex, 1);
+      data[listIndex].cards.push(startCardObject);
+    }
+    if (finishListIndex == -1 && finishCardIndex > -1) {
+      data[startListIndex].cards.splice(startCardIndex, 1);
+      data[listIndex].cards.splice(finishCardIndex, 0, startCardObject);
+    }
+    // if (finishListIndex == -1 && finishCardIndex == -1) {
+    //   console.log(startCardIndex);
+    // }
     resetVariables();
     console.log(data);
     window.localStorage.setItem("columns", JSON.stringify(data));
@@ -174,15 +202,24 @@ function createCard(cardData, cardIndex, listIndex) {
     draggable: true
   });
   card.addEventListener("drag", event => {
-    draggableCardObject = cardData;
-    draggableCardIndex = cardIndex;
-    draggableListIndex = listIndex;
+    startCardObject = cardData;
+    startCardIndex = cardIndex;
+    startListIndex = listIndex;
   });
   card.addEventListener("dragover", event => {
-    draggedOverCardIndex = cardIndex;
-    console.log("dragover", cardIndex);
+    // console.log({ listIndex, startListIndex, cardIndex, startCardIndex });
+    if (cardIndex !== startCardIndex) {
+      finishCardIndex = cardIndex;
+    }
+    // if (listIndex !== startListIndex && cardIndex !== startCardIndex) {
+    //   console.log('it's on');
+    // }
   });
   return card;
+}
+
+function createCardSpace() {
+  return createElement("div", { className: "cardSpace" });
 }
 
 function createElement(type, params) {
@@ -201,8 +238,9 @@ function clearColumns() {
 }
 
 function resetVariables() {
-  draggableCardObject = null;
-  draggableCardIndex = -1;
-  draggableListIndex = -1;
-  draggedOverCardIndex = -1;
+  startCardObject = null;
+  startCardIndex = -1;
+  startListIndex = -1;
+  finishCardIndex = -1;
+  finishListIndex = -1;
 }
