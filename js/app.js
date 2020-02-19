@@ -1,8 +1,9 @@
 let addList = false;
 const columns = document.querySelector("#columns");
 let data = [];
-let listCounter = 0;
-let cardCounter = 0;
+let draggableCardObject = null;
+let draggableCardIndex = -1;
+let dragggableListIndex = -1;
 
 window.addEventListener("load", event => {
   render();
@@ -14,14 +15,12 @@ function render() {
     storageData = JSON.parse(storageData);
     data = storageData;
     clearColumns();
-    data.forEach(column => {
-      columns.appendChild(createList(column.title, column.id));
-      listCounter++;
-      column.cards.forEach(card => {
-        document
-          .querySelector("#" + column.id)
-          .appendChild(createCard(card.text));
-        cardCounter++;
+
+    data.forEach((column, listIndex) => {
+      let list = createList(column.title, listIndex);
+      columns.appendChild(list);
+      column.cards.forEach((card, cardIndex) => {
+        list.appendChild(createCard(card, cardIndex, listIndex));
       });
     });
   }
@@ -65,7 +64,6 @@ function createListInput() {
   });
   addListButton.addEventListener("click", event => {
     data.push({
-      id: "list-" + listCounter,
       title: listTitle.value,
       cards: []
     });
@@ -84,16 +82,32 @@ function createListInput() {
     createAddAnotherListButton();
   });
   listButtons.appendChild(exitListButton);
-
   list.appendChild(listButtons);
 
   return list;
 }
 
-function createList(title, listId) {
+function createList(title, listIndex) {
   let list = createElement("div", {
-    className: "list",
-    id: listId
+    className: "list"
+  });
+
+  list.addEventListener("dragover", event => {
+    event.preventDefault();
+  });
+
+  list.addEventListener("dragenter", event => {
+    event.preventDefault();
+  });
+
+  list.addEventListener("drop", event => {
+    console.log(event);
+    data[listIndex].cards.push(draggableCardObject);
+    data[dragggableListIndex].cards.splice(draggableCardIndex, 1);
+    resetVariables();
+    console.log(data);
+    window.localStorage.setItem("columns", JSON.stringify(data));
+    render();
   });
 
   let listTitle = createElement("h4", {
@@ -103,17 +117,13 @@ function createList(title, listId) {
 
   list.appendChild(listTitle);
 
-  let listButtons = createElement("div", {
-    className: "cardButtons"
-  });
-
   let addListButton = createElement("button", {
     type: "button",
     textContent: "Add Card"
   });
   addListButton.addEventListener("click", event => {
     list.removeChild(addListButton);
-    list.appendChild(createCardInput());
+    list.appendChild(createCardInput(listIndex));
   });
 
   list.appendChild(addListButton);
@@ -121,7 +131,7 @@ function createList(title, listId) {
   return list;
 }
 
-function createCardInput() {
+function createCardInput(listIndex) {
   let card = createElement("div");
   let cardInput = createElement("input", {
     type: "text",
@@ -136,10 +146,9 @@ function createCardInput() {
     textContent: "Add Card"
   });
   addCardButton.addEventListener("click", event => {
-    console.log(listCounter);
-    data[listCounter].cards.push({
-      id: "card-" + cardCounter,
-      text: cardInput.value
+    data[listIndex].cards.push({
+      text: cardInput.value,
+      isDragging: false
     });
     window.localStorage.setItem("columns", JSON.stringify(data));
     render();
@@ -160,12 +169,18 @@ function createCardInput() {
   return card;
 }
 
-function createCard(text) {
-  return createElement("p", {
-    textContent: text,
+function createCard(cardData, cardIndex, listIndex) {
+  let card = createElement("p", {
+    textContent: cardData.text,
     className: "card",
-    id: "card-" + cardCounter
+    draggable: true
   });
+  card.addEventListener("drag", event => {
+    draggableCardObject = cardData;
+    draggableCardIndex = cardIndex;
+    dragggableListIndex = listIndex;
+  });
+  return card;
 }
 
 function createElement(type, params) {
@@ -181,4 +196,10 @@ function createElement(type, params) {
 
 function clearColumns() {
   columns.innerHTML = "";
+}
+
+function resetVariables() {
+  draggableCardObject = null;
+  draggableCardIndex = -1;
+  dragggableListIndex = -1;
 }

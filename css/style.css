@@ -1,7 +1,6 @@
 #columns {
   display: flex;
 }
-
 .addAnotherListButton {
   width: 150px;
   height: 30px;
@@ -11,8 +10,12 @@
 .list,
 .listInput {
   background-color: rgba(0, 0, 0, 0.24);
+  margin-right: 50px;
+  width: 270px;
+  height: 500px;
 }
 
 .card {
   border: 1px solid black;
+  height: 30px;
 }
