@@ -1,0 +1,18 @@
+#columns {
+  display: flex;
+}
+
+.addAnotherListButton {
+  width: 150px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.24);
+  color: #fff;
+}
+.list,
+.listInput {
+  background-color: rgba(0, 0, 0, 0.24);
+}
+
+.card {
+  border: 1px solid black;
+}
