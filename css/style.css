@@ -23,6 +23,7 @@
   color: #172b4d;
   width: 240px;
   border-radius: 5px;
+  cursor: pointer;
 }
 .cardContainer {
   flex: 1 1 auto;
