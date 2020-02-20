@@ -95,11 +95,34 @@ function createList(title, listIndex) {
     className: "list"
   });
 
+  let titleContainer = createElement("div", { className: "titleContainer" });
+
+  titleContainer.addEventListener("dragover", event => {
+    event.preventDefault();
+    if (finishCardIndex == -1) {
+      if (document.querySelector(".cardSpace")) {
+        document
+          .querySelector(".cardSpace")
+          .parentNode.removeChild(document.querySelector(".cardSpace"));
+      }
+      list.lastChild.appendChild(createCardSpace());
+    }
+  });
+
   list.addEventListener("dragover", event => {
     event.preventDefault();
     if (startListIndex !== listIndex) {
       finishListIndex = listIndex;
     }
+  });
+
+  titleContainer.addEventListener("dragenter", event => {
+    event.preventDefault();
+    // if (document.querySelector('.cardSpace')) {
+    //   document
+    //     .querySelector('.cardSpace')
+    //     .parentNode.removeChild(document.querySelector('.cardSpace'));
+    // }
   });
 
   list.addEventListener("dragenter", event => {
@@ -123,6 +146,7 @@ function createList(title, listIndex) {
       data[startListIndex].cards.splice(startCardIndex, 1);
       data[listIndex].cards.splice(finishCardIndex, 0, startCardObject);
     }
+
     resetVariables();
     window.localStorage.setItem("columns", JSON.stringify(data));
     render();
@@ -133,7 +157,7 @@ function createList(title, listIndex) {
     textContent: title
   });
 
-  list.appendChild(listTitle);
+  titleContainer.appendChild(listTitle);
 
   let addListButton = createElement("button", {
     type: "button",
@@ -144,7 +168,8 @@ function createList(title, listIndex) {
     list.appendChild(createCardInput(listIndex));
   });
 
-  list.appendChild(addListButton);
+  titleContainer.appendChild(addListButton);
+  list.appendChild(titleContainer);
 
   return list;
 }
@@ -192,19 +217,47 @@ function createCard(cardData, cardIndex, listIndex) {
     className: "card",
     draggable: true
   });
+
   card.addEventListener("drag", event => {
     startCardObject = cardData;
     startCardIndex = cardIndex;
     startListIndex = listIndex;
+    card.className = "cardShadow";
+    card.textContent = "";
   });
+
+  card.addEventListener("dragend", event => {
+    render();
+  });
+
   card.addEventListener("dragover", event => {
-    if (cardIndex !== startCardIndex) {
+    if (cardIndex !== startCardIndex || listIndex !== startListIndex) {
       finishCardIndex = cardIndex;
-    }
-    if (!document.querySelector(".cardSpace")) {
-      card.parentNode.insertBefore(createCardSpace(), card);
+      if (!document.querySelector(".cardSpace")) {
+        let cardSpace = createCardSpace();
+        cardSpace.addEventListener("dragover", event => {
+          if (cardIndex !== startCardIndex || listIndex !== startListIndex) {
+            finishCardIndex = cardIndex;
+          }
+        });
+        if (document.querySelector(".cardShadow")) {
+          document
+            .querySelector(".cardShadow")
+            .parentNode.removeChild(document.querySelector(".cardShadow"));
+        }
+        console.log(finishCardIndex);
+
+        if (data[listIndex].cards.length - 1 !== cardIndex) {
+          card.parentNode.insertBefore(cardSpace, card);
+          console.log("before");
+        } else {
+          card.parentNode.insertBefore(cardSpace, card.nextSibling);
+          console.log("after");
+        }
+      }
     }
   });
+
   card.addEventListener("dragenter", event => {
     event.preventDefault();
     if (document.querySelector(".cardSpace")) {
@@ -213,9 +266,14 @@ function createCard(cardData, cardIndex, listIndex) {
         .parentNode.removeChild(document.querySelector(".cardSpace"));
     }
   });
+
   card.addEventListener("dragleave", event => {
     event.preventDefault();
+    if (cardIndex == finishCardIndex) {
+      finishCardIndex = -1;
+    }
   });
+
   return card;
 }
 
